@@ -1,0 +1,21 @@
+---
+
+- name: Say Hello
+  command: hostname
+
+- name: PPA PHP7 package repository
+  apt_repository: repo="ppa:ondrej/php-7.0" state=present
+
+- name: Install PHP packages
+  apt: name={{ item }} state=present force=yes
+  with_items:
+      - php7.0-common
+      - libapache2-mod-php7.0
+      - php7.0
+      - php-imap
+      - php-intl
+      - php-pspell
+      - php-recode
+      - php-curl
+      - php-gd
+      - php-ldap

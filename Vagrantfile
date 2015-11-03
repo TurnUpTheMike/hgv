@@ -97,7 +97,15 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
         vm.vmx["displayname"] = vagrant_name
     end
 
+    wpe_dir_mount_point = '/host/wpe'
+    wpe_home_dir_var = 'WPE_HOME'
+    WPE_HOME = ENV[wpe_home_dir_var]
+    WPE_HOME || begin
+        raise " ---- ERROR: #{wpe_home_dir_var} environment variable not found; #{wpe_home_dir_var} should be set to the path of a directory on your machine with a server-cm checkout for provisioning ---- "
+        end
+
     config.vm.synced_folder "./hgv_data", "/hgv_data", owner: "www-data", group: "www-data", create: "true"
+    config.vm.synced_folder WPE_HOME, wpe_dir_mount_point
 
     config.vm.synced_folders.each do |id, options|
         # Make sure we use Samba for file mounts on Windows
