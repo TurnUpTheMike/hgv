@@ -19,3 +19,23 @@
       - php-curl
       - php-gd
       - php-ldap
+      - php-mysql
+      - php7.0-dev      #we should not leave this in production, this is so we can add .so extensions that are not current packages
+      - pkg-config      #this is a dependency for memcached, we should not add this for production
+      - libmemcached-dev    #dependency for memcached, and not for production
+
+
+- name: Grab the memcache source
+  git: repo=git://github.com/php-memcached-dev/php-memcached.git dest=/opt/php-memcached update=no version=php7 accept_hostkey=yes
+
+- name: Compile php7 memcached
+  command: /vagrant/provisioning7/roles/whome/files/build-php7-memcached.sh chdir=/opt/php-memcached creates=/opt/php-memcached/modules/memcached.so
+
+- name: Create memcached ini file
+  lineinfile: create=yes dest=/etc/php/mods-available/memcached.ini line="extension=memcached.so" state=present mode=644
+
+- name: CLI Link to memcached ini file
+  file: state=link src=/etc/php/mods-available/memcached.ini path=/etc/php/7.0/cli/conf.d/20-memcached.ini
+
+- name: Apache2 link to memcached ini file
+  file: state=link src=/etc/php/mods-available/memcached.ini path=/etc/php/7.0/apache2/conf.d/20-memcached.ini
