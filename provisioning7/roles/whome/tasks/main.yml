@@ -24,6 +24,8 @@
       - pkg-config      #this is a dependency for memcached, we should not add this for production
       - libmemcached-dev    #dependency for memcached, and not for production
       - libmagickwand-dev   #dependency for imagick, not for production
+      - libssh2-1-dev       #dependency for ssh2
+      - libssh2-1           #dependency for ssh2
 
 
 #Tasks for memcache
@@ -57,6 +59,22 @@
 
 - name: Apache2 link to imagick ini file
   file: state=link src=/etc/php/mods-available/imagick.ini path=/etc/php/7.0/apache2/conf.d/20-imagick.ini
+
+#Tasks for ssh2
+- name: Grab the ssh2 source
+  git: repo=git://github.com/Sean-Der/pecl-networking-ssh2.git dest=/opt/php-ssh2 update=no version=php7 accept_hostkey=yes
+
+- name: Compile ssh2 for php7
+  command: /vagrant provisioning7/roles/whome/files/build-php7-ssh2.sh chdir=/opt/php-ssh2 creates=/opt/php-ssh2/modules/ssh2.so
+
+- name: Create ssh2 ini file
+  lineinfile: create=yes dest=/etc/php/mods-available/ssh2.ini line="extension=ssh2.so" state=present mode=644
+
+- name: CLI Link to ssh2 ini file
+  file: state=link src=/etc/php/mods-available/ssh2.ini path=/etc/php/7.0/cli/conf.d/20-ssh2.ini
+
+- name: Apache2 link to ssh2 ini file
+  file: state=link src=/etc/php/mods-available/ssh2.ini path=/etc/php/7.0/apache2/conf.d/20-ssh2.ini
 
 #Tasks for runkit
 #- name: Grab the runkit source
