@@ -23,8 +23,10 @@
       - php7.0-dev      #we should not leave this in production, this is so we can add .so extensions that are not current packages
       - pkg-config      #this is a dependency for memcached, we should not add this for production
       - libmemcached-dev    #dependency for memcached, and not for production
+      - libmagickwand-dev   #dependency for imagick, not for production
 
 
+#Tasks for memcache
 - name: Grab the memcache source
   git: repo=git://github.com/php-memcached-dev/php-memcached.git dest=/opt/php-memcached update=no version=php7 accept_hostkey=yes
 
@@ -39,3 +41,23 @@
 
 - name: Apache2 link to memcached ini file
   file: state=link src=/etc/php/mods-available/memcached.ini path=/etc/php/7.0/apache2/conf.d/20-memcached.ini
+
+#Tasks for imagick
+- name: Grab the imagick source
+  git: repo=git://github.com/mkoppanen/imagick.git dest=/opt/php-imagick update=no version=phpseven accept_hostkey=yes
+
+- name: Compile php7 imagick
+  command: /vagrant/provisioning7/roles/whome/files/build-php7-memcached.sh chdir=/opt/php-imagick creates=/opt/php-imagick/modules/imagick.so
+
+- name: Create imagick ini file
+  lineinfile: create=yes dest=/etc/php/mods-available/imagick.ini line="extension=imagick.so" state=present mode=644
+
+- name: CLI Link to imagick ini file
+  file: state=link src=/etc/php/mods-available/imagick.ini path=/etc/php/7.0/cli/conf.d/20-imagick.ini
+
+- name: Apache2 link to imagick ini file
+  file: state=link src=/etc/php/mods-available/imagick.ini path=/etc/php/7.0/apache2/conf.d/20-imagick.ini
+
+#Tasks for runkit
+#- name: Grab the runkit source
+#  git: repo=git://github.com/zenovich/runkit.git dest=/opt/php-runkit update=no version=master accept_hostkey=yes
