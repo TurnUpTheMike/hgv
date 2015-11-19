@@ -21,15 +21,16 @@
       - php-ldap
       - php-mysql
       - php7.0-dev      #we should not leave this in production, this is so we can add .so extensions that are not current packages
-      - pkg-config      #this is a dependency for memcached, we should not add this for production
+      - pkg-config      #this is a dependency for memcached, we should not add this for production, also for imagick.so
       - libmemcached-dev    #dependency for memcached, and not for production
       - libmagickwand-dev   #dependency for imagick, not for production
       - libssh2-1-dev       #dependency for ssh2
       - libssh2-1           #dependency for ssh2
+      - php7.0-fpm
 
 
-#Tasks for memcache
-- name: Grab the memcache source
+#Tasks for memcached
+- name: Grab the memcached source
   git: repo=git://github.com/php-memcached-dev/php-memcached.git dest=/opt/php-memcached update=no version=php7 accept_hostkey=yes
 
 - name: Compile php7 memcached
@@ -49,7 +50,7 @@
   git: repo=git://github.com/mkoppanen/imagick.git dest=/opt/php-imagick update=no version=phpseven accept_hostkey=yes
 
 - name: Compile php7 imagick
-  command: /vagrant/provisioning7/roles/whome/files/build-php7-memcached.sh chdir=/opt/php-imagick creates=/opt/php-imagick/modules/imagick.so
+  command: /vagrant/provisioning7/roles/whome/files/build-php7-imagick.sh chdir=/opt/php-imagick creates=/opt/php-imagick/modules/imagick.so
 
 - name: Create imagick ini file
   lineinfile: create=yes dest=/etc/php/mods-available/imagick.ini line="extension=imagick.so" state=present mode=644
@@ -65,7 +66,7 @@
   git: repo=git://github.com/Sean-Der/pecl-networking-ssh2.git dest=/opt/php-ssh2 update=no version=php7 accept_hostkey=yes
 
 - name: Compile ssh2 for php7
-  command: /vagrant provisioning7/roles/whome/files/build-php7-ssh2.sh chdir=/opt/php-ssh2 creates=/opt/php-ssh2/modules/ssh2.so
+  command: /vagrant/provisioning7/roles/whome/files/build-php7-ssh2.sh chdir=/opt/php-ssh2 creates=/opt/php-ssh2/modules/ssh2.so
 
 - name: Create ssh2 ini file
   lineinfile: create=yes dest=/etc/php/mods-available/ssh2.ini line="extension=ssh2.so" state=present mode=644
@@ -79,3 +80,5 @@
 #Tasks for runkit
 #- name: Grab the runkit source
 #  git: repo=git://github.com/zenovich/runkit.git dest=/opt/php-runkit update=no version=master accept_hostkey=yes
+
+#Put php5-fpm back on, we somehow remove it when we install php7.0-fpm
